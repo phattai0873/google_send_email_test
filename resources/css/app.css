@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --color-paper: oklch(98.5% 0.004 250);
+    --color-paper-2: oklch(96% 0.006 250);
+    --color-rule: oklch(91% 0.008 250);
+    --color-rule-2: oklch(82% 0.01 250);
+    --color-neutral: oklch(56% 0.008 250);
+    --color-muted: oklch(40% 0.008 250);
+    --color-ink: oklch(24% 0.02 258);
+    --color-ink-2: oklch(34% 0.018 257);
+    --color-accent: oklch(58% 0.20 256);
+    --color-accent-ink: oklch(98.5% 0.004 250);
+    --color-focus: oklch(70% 0.19 256);
+    --color-graphite: oklch(22% 0.016 260);
+
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --radius-card: 10px;
+    --radius-input: 6px;
+}
