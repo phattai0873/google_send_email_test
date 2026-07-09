@@ -1,58 +1,160 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Google Authentication & Gmail API Broadcast Manager (Laravel)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Dự án này là hệ thống hỗ trợ người dùng đăng nhập bằng tài khoản Google (OAuth 2.0) và thực hiện chức năng gửi email quảng bá hàng loạt đến một danh sách người nhận linh hoạt sử dụng chính **Gmail API** của tài khoản đăng nhập đó.
 
-## About Laravel
+Hệ thống được thiết kế theo phong cách giao diện tối giản kỹ thuật **Cobalt Theme (Modern-Minimal)** với trải nghiệm mượt mà, phản hồi nhanh cùng hộp lệnh phím tắt `⌘K`.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🌟 Tính năng nổi bật
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. **Google OAuth Login (Stateless)**: Đăng nhập an toàn bằng tài khoản Google, tự động đồng bộ hóa thông tin người dùng (tên, email, ảnh đại diện) vào cơ sở dữ liệu.
+2. **Gửi Mail động qua Gmail API**: Thư quảng bá được gửi đi từ chính địa chỉ Gmail của người vừa đăng nhập (sử dụng Access Token lưu trong session) thay vì dùng cấu hình SMTP tĩnh thông thường.
+3. **Quản lý người nhận linh hoạt (Dynamic Recipient Checklist)**:
+    - Tích chọn/bỏ tích để quyết định người nhận trong danh sách gửi.
+    - Chỉnh sửa trực tiếp nội dung địa chỉ email.
+    - Thêm mới hàng người nhận hoặc Xóa người nhận động bằng JavaScript.
+4. **Nhật ký chiến dịch cá nhân hóa (Email Logs)**: Lưu trữ lịch sử tất cả các email đã gửi thành công/thất bại và hiển thị riêng tư theo từng tài khoản đăng nhập.
+5. **Hộp lệnh nhanh ⌘K (Command Palette)**: Nhấn `⌘K` hoặc `Ctrl+K` để mở hộp tìm kiếm và điều hướng nhanh (Focus vào Tiêu đề, Nội dung, Cuộn nhanh xuống Nhật ký...).
+6. **Mailable Layout đẹp mắt**: Mẫu email gửi đi chuyên nghiệp, căn chỉnh dòng hiển thị sạch sẽ và hỗ trợ hiển thị tốt trên mọi thiết bị.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🗄️ Cấu trúc Cơ sở dữ liệu (Database Schema)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Hệ thống được thiết kế tối giản, chỉ lưu trữ dữ liệu trên **2 bảng chính**:
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### 1. Bảng `users`
 
-## Agentic Development
+Lưu trữ thông tin tài khoản người dùng đăng nhập qua Google OAuth.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+- `id`: Khóa chính (BigInt, Auto Increment).
+- `name`: Tên hiển thị từ Google.
+- `email`: Địa chỉ email (Unique).
+- `avatar`: Đường dẫn ảnh đại diện.
+- `google_id`: ID định danh duy nhất của Google.
+- `google_token`: Access Token dùng để đại diện gửi thư.
+- `created_at` / `updated_at`: Thời gian tạo/cập nhật.
+
+### 2. Bảng `email_logs`
+
+Lưu nhật ký các lần gửi email quảng bá.
+
+- `id`: Khóa chính (BigInt, Auto Increment).
+- `user_id`: Khóa ngoại liên kết tới bảng `users` (Cascade Delete).
+- `subject`: Tiêu đề email.
+- `content`: Nội dung thư.
+- `recipients`: Danh sách email nhận (lưu dưới dạng mảng JSON).
+- `total_recipients`: Tổng số người nhận được gửi.
+- `sent_success`: Số lượng gửi thành công.
+- `sent_failed`: Số lượng gửi thất bại.
+- `created_at` / `updated_at`: Thời gian tạo/cập nhật.
+
+---
+
+## 🛠️ Hướng dẫn Cài đặt & Cấu hình
+
+### 1. Yêu cầu hệ thống
+
+- **PHP** >= 8.2
+- **Composer**
+- **Node.js & NPM**
+- **MySQL**
+
+### 2. Các bước cài đặt
 
 ```bash
-composer require laravel/boost --dev
+# 1. Clone dự án và truy cập vào thư mục
+git clone <repository_url> google_send_email_test
+cd google_send_email_test
 
-php artisan boost:install
+# 2. Cài đặt các gói phụ thuộc PHP
+composer install
+
+# 3. Cài đặt các gói phụ thuộc CSS/JS
+npm install
+npm run build
+
+# 4. Sao chép tệp cấu hình môi trường
+cp .env.example .env
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 3. Cấu hình tệp `.env`
 
-## Contributing
+Mở file `.env` và thiết lập các thông số sau:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+#### Cơ sở dữ liệu MySQL:
 
-## Code of Conduct
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=google_send_email_test
+DB_USERNAME=root
+DB_PASSWORD=your_mysql_password
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+#### Google OAuth credentials & Redirect URI:
 
-## Security Vulnerabilities
+Đăng ký thông tin thông tin Credential (OAuth 2.0 Client IDs) tại [Google Cloud Console](https://console.cloud.google.com/):
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```env
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
+```
 
-## License
+#### Cấu hình Email dự phòng (SMTP Fallback):
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your_backup_email@gmail.com
+MAIL_PASSWORD="your_gmail_app_password"
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS="your_backup_email@gmail.com"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+### 4. Chạy Migrations tái cấu trúc DB
+
+```bash
+php artisan migrate
+```
+
+---
+
+## 🚀 Kích hoạt API Google & Chạy dự án
+
+### 1. Kích hoạt Gmail API trên Google Cloud
+
+Để hệ thống có thể dùng token tài khoản gửi thư đi, bạn bắt buộc phải kích hoạt Gmail API cho dự án của bạn trên Google Cloud Console:
+
+1. Truy cập vào trang **[Kích hoạt Gmail API](https://console.developers.google.com/apis/api/gmail.googleapis.com/overview)**.
+2. Đảm bảo chọn đúng dự án và bấm **Enable** (Bật).
+3. Tại trang cấu hình **OAuth consent screen**:
+    - Thêm địa chỉ Gmail bạn định đăng nhập thử nghiệm vào mục **Test users** (vì app đang ở trạng thái Testing nên bắt buộc phải có tài khoản trong danh sách này mới đăng nhập được).
+    - Khi đăng nhập lần đầu, hãy chắc chắn tích chọn vào hộp kiểm **"Gửi email thay mặt bạn" (Send email on your behalf)** ở màn hình đồng ý của Google.
+
+### 2. Khởi chạy Server
+
+```bash
+# Khởi động Laravel server
+php artisan serve
+```
+
+Mở trình duyệt truy cập vào địa chỉ mặc định `http://127.0.0.1:8000` để bắt đầu trải nghiệm.
+
+---
+
+## 🧪 Chạy Kiểm thử tự động (PHPUnit Tests)
+
+Dự án tích hợp bộ kiểm thử bao phủ toàn bộ luồng Auth, validate tham số gửi thư, mock gọi API Google Gmail và ghi nhận logs database:
+
+```bash
+# Chạy bộ test suite
+./vendor/bin/phpunit
+```
+
+Bộ kiểm thử gồm **10 tests** và **35 assertions** sẽ chạy và phản hồi trạng thái thành công lập tức.
