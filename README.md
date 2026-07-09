@@ -145,16 +145,3 @@ php artisan serve
 ```
 
 Mở trình duyệt truy cập vào địa chỉ mặc định `http://127.0.0.1:8000` để bắt đầu trải nghiệm.
-
----
-
-## 🧪 Chạy Kiểm thử tự động (PHPUnit Tests)
-
-Dự án tích hợp bộ kiểm thử bao phủ toàn bộ luồng Auth, validate tham số gửi thư, mock gọi API Google Gmail và ghi nhận logs database:
-
-```bash
-# Chạy bộ test suite
-./vendor/bin/phpunit
-```
-
-Bộ kiểm thử gồm **10 tests** và **35 assertions** sẽ chạy và phản hồi trạng thái thành công lập tức.
