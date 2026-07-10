@@ -504,6 +504,24 @@
                     }
                 });
             }, 100);
+
+            // Prevent double form submissions on send email
+            const campaignForm = document.getElementById('campaign-form');
+            if (campaignForm) {
+                campaignForm.addEventListener('submit', () => {
+                    const submitBtn = campaignForm.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        setTimeout(() => {
+                            submitBtn.disabled = true;
+                            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                            const spanText = submitBtn.querySelector('span');
+                            if (spanText) {
+                                spanText.textContent = 'Đang gửi...';
+                            }
+                        }, 50);
+                    }
+                });
+            }
         });
 
         // Command Palette Logic

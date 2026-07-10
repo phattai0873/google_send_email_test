@@ -76,7 +76,8 @@ class EmailCampaignController extends Controller
             if (!empty($user->google_token)) {
                 // Send dynamically using Google Gmail API with the user's logged-in token
                 try {
-                    $rawMessage = "From: " . $user->name . " <" . $user->email . ">\r\n";
+                    $encodedName = "=?utf-8?B?" . base64_encode($user->name) . "?=";
+                    $rawMessage = "From: " . $encodedName . " <" . $user->email . ">\r\n";
                     $rawMessage .= "To: " . $recipient . "\r\n";
                     $rawMessage .= "Subject: =?utf-8?B?" . base64_encode($request->subject) . "?=\r\n";
                     $rawMessage .= "MIME-Version: 1.0\r\n";
