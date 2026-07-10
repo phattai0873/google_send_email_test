@@ -448,17 +448,17 @@
                 @auth
                     <!-- Focus Subject Command -->
                     <button onclick="triggerPaletteAction('focus-subject')" class="w-full text-left px-3 py-2.5 rounded-[6px] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-ink)] transition-colors flex items-center justify-between group cursor-pointer">
-                        <span class="font-medium text-[var(--color-ink)] group-hover:text-inherit">Soạn chiến dịch mới (Focus Subject)</span>
+                        <span class="font-medium text-[var(--color-ink)] group-hover:text-inherit">Soạn nội dung quảng bá mới</span>
                         <kbd class="text-[10px] text-[var(--color-muted)] group-hover:text-inherit">S</kbd>
                     </button>
                     <!-- Focus Content Command -->
                     <button onclick="triggerPaletteAction('focus-content')" class="w-full text-left px-3 py-2.5 rounded-[6px] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-ink)] transition-colors flex items-center justify-between group cursor-pointer">
-                        <span class="font-medium text-[var(--color-ink)] group-hover:text-inherit">Soạn nội dung email (Focus Content)</span>
+                        <span class="font-medium text-[var(--color-ink)] group-hover:text-inherit">Soạn nội dung email</span>
                         <kbd class="text-[10px] text-[var(--color-muted)] group-hover:text-inherit">C</kbd>
                     </button>
                     <!-- Scroll to History Command -->
                     <button onclick="triggerPaletteAction('scroll-history')" class="w-full text-left px-3 py-2.5 rounded-[6px] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-ink)] transition-colors flex items-center justify-between group cursor-pointer">
-                        <span class="font-medium text-[var(--color-ink)] group-hover:text-inherit">Xem nhật ký chiến dịch (Scroll to History)</span>
+                        <span class="font-medium text-[var(--color-ink)] group-hover:text-inherit">Xem nhật ký quảng bá</span>
                         <kbd class="text-[10px] text-[var(--color-muted)] group-hover:text-inherit">H</kbd>
                     </button>
                     <!-- Trigger Logout Command -->
