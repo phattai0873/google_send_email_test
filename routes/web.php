@@ -11,5 +11,6 @@ Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleC
 Route::middleware('auth')->group(function () {
     Route::get('/send-email', fn() => redirect()->route('home'));
     Route::post('/send-email', [EmailCampaignController::class, 'send'])->name('email.send');
+    Route::get('/logs', [EmailCampaignController::class, 'logs'])->name('email.logs');
     Route::post('/logout', [GoogleAuthController::class, 'logout'])->name('logout');
 });

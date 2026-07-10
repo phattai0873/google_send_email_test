@@ -183,7 +183,7 @@ class GoogleAuthAndCampaignTest extends TestCase
             ],
         ]);
 
-        $response->assertRedirect(route('home'));
+        $response->assertRedirect(route('email.logs'));
         $response->assertSessionHas('success');
 
         // Check Mail was sent to all 3 recipients
@@ -236,7 +236,7 @@ class GoogleAuthAndCampaignTest extends TestCase
             ],
         ]);
 
-        $response->assertRedirect(route('home'));
+        $response->assertRedirect(route('email.logs'));
         $response->assertSessionHas('success');
 
         // Check HTTP Request was made to Gmail API twice

@@ -6,57 +6,70 @@
     <title>{{ $emailSubject }}</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f8fafc;
-            color: #334155;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f4f5f6;
+            color: #2d3748;
             margin: 0;
             padding: 0;
             -webkit-text-size-adjust: none;
             width: 100% !important;
         }
         .wrapper {
-            background-color: #f8fafc;
-            padding: 40px 20px;
+            background-color: #f4f5f6;
+            padding: 32px 16px;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            border-top: 4px solid #4f46e5;
         }
         .header {
-            background: linear-gradient(135deg, #4f46e5, #6366f1);
-            padding: 30px 40px;
-            text-align: center;
+            padding: 24px 32px 16px;
+            border-bottom: 1px solid #f7fafc;
         }
-        .header h1 {
-            color: #ffffff;
-            font-size: 24px;
+        .logo-text {
+            font-size: 14px;
             font-weight: 700;
-            margin: 0;
-            letter-spacing: -0.025em;
+            color: #4f46e5;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
         }
         .content {
-            padding: 40px;
+            padding: 32px;
             line-height: 1.6;
-            font-size: 16px;
+            font-size: 15px;
+            color: #2d3748;
         }
-        .content p {
-            margin: 0 0 16px;
+        .content h1, .content h2, .content h3 {
+            color: #1a202c;
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+        .email-subject {
+            font-size: 20px;
+            color: #1a202c;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 12px;
+            font-weight: 700;
         }
         .footer {
-            background-color: #f1f5f9;
-            padding: 20px 40px;
+            background-color: #fafbfc;
+            padding: 24px 32px;
             text-align: center;
-            font-size: 12px;
-            color: #64748b;
-            border-top: 1px solid #e2e8f0;
+            font-size: 11px;
+            color: #718096;
+            border-top: 1px solid #edf2f7;
+            line-height: 1.5;
         }
         .footer p {
-            margin: 0;
+            margin: 0 0 4px;
         }
     </style>
 </head>
@@ -64,14 +77,15 @@
     <div class="wrapper">
         <div class="container">
             <div class="header">
-                <h1>{{ $emailSubject }}</h1>
+                <span class="logo-text">MailCampaign</span>
             </div>
             <div class="content">
-                {!! nl2br(e($content)) !!}
+                <div class="email-subject">{{ $emailSubject }}</div>
+                {!! $content !!}
             </div>
             <div class="footer">
-                <p>Tin nhắn này được gửi tự động từ chiến dịch quảng bá của chúng tôi.</p>
-                <p>&copy; {{ date('Y') }} Laravel Mail App. All rights reserved.</p>
+                <p>Thư này được gửi tự động từ chiến dịch quảng bá thông qua hệ thống MailCampaign.</p>
+                <p>&copy; {{ date('Y') }} MailCampaign. Tất cả các quyền được bảo lưu.</p>
             </div>
         </div>
     </div>

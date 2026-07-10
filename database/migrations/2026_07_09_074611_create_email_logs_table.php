@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('sent_success');
             $table->integer('sent_failed');
             $table->text('recipients')->nullable();
+            $table->string('status')->default('pending');
             $table->timestamps();
         });
     }
