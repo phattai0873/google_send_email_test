@@ -10,7 +10,7 @@ use App\Models\User;
 use Exception;
 
 class GoogleAuthController extends Controller
-{
+{ 
     /**
      * Redirect the user to the Google authentication page.
      *
@@ -37,13 +37,11 @@ class GoogleAuthController extends Controller
             return redirect()->route('home')->with('error', 'Đăng nhập bằng Google thất bại. Vui lòng thử lại.');
         }
 
-        // Find existing user by google_id or email
         $user = User::where('google_id', $googleUser->getId())
             ->orWhere('email', $googleUser->getEmail())
             ->first();
 
         if ($user) {
-            // Update user info
             $user->update([
                 'name' => $googleUser->getName(),
                 'avatar' => $googleUser->getAvatar(),
@@ -51,14 +49,12 @@ class GoogleAuthController extends Controller
                 'google_token' => $googleUser->token,
             ]);
         } else {
-            // Create user
             $user = User::create([
                 'name' => $googleUser->getName(),
                 'email' => $googleUser->getEmail(),
                 'avatar' => $googleUser->getAvatar(),
                 'google_id' => $googleUser->getId(),
                 'google_token' => $googleUser->token,
-                'password' => null, // Google authenticated users don't need a password
             ]);
         }
 

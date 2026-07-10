@@ -149,7 +149,7 @@
                             <label for="subject" class="block font-mono text-[10px] uppercase tracking-[0.06em] text-[var(--color-muted)] font-semibold">
                                 Tiêu đề email
                             </label>
-                            <input type="text" id="subject" name="subject" value="{{ old('subject') }}" placeholder="Nhập tiêu đề..." class="w-full px-3 py-2.5 text-sm rounded-[6px] border border-[var(--color-rule-2)] bg-[var(--color-paper)] text-[var(--color-ink)] placeholder-[var(--color-muted)] outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all font-body">
+                            <input type="text" id="subject" name="subject" value="{{ old('subject') }}" required placeholder="Nhập tiêu đề..." class="w-full px-3 py-2.5 text-sm rounded-[6px] border border-[var(--color-rule-2)] bg-[var(--color-paper)] text-[var(--color-ink)] placeholder-[var(--color-muted)] outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all font-body">
                             @error('subject')
                                 <p class="text-xs text-red-500 font-mono mt-1">* {{ $message }}</p>
                             @enderror

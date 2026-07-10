@@ -419,74 +419,82 @@
 
         // Modal functions
         const detailModal = document.getElementById('detail-modal');
+        window.activeModalLogId = null;
+
+        function updateActiveModalUI(log) {
+            // Set Subject
+            document.getElementById('modal-subject').textContent = log.subject || '(Không có tiêu đề)';
+            
+            // Set Info Grid
+            document.getElementById('modal-sender').textContent = log.sender_name || 'N/A';
+            document.getElementById('modal-time').textContent = `${log.created_at_date} ${log.created_at_time}`;
+            document.getElementById('modal-success').textContent = log.sent_success;
+            document.getElementById('modal-failed').textContent = log.sent_failed;
+            
+            // Style and set status in detail modal
+            const statusEl = document.getElementById('modal-status');
+            if (log.status === 'pending') {
+                statusEl.className = 'text-amber-600 font-semibold';
+                statusEl.textContent = 'Chờ gửi';
+            } else if (log.status === 'sending') {
+                statusEl.className = 'text-blue-600 font-semibold';
+                statusEl.textContent = 'Đang gửi';
+            } else if (log.status === 'completed') {
+                statusEl.className = 'text-emerald-600 font-semibold';
+                statusEl.textContent = 'Hoàn thành';
+            } else {
+                statusEl.className = 'text-rose-600 font-semibold';
+                statusEl.textContent = 'Thất bại';
+            }
+            
+            // Style failed count based on value
+            const failedEl = document.getElementById('modal-failed');
+            if (log.sent_failed > 0) {
+                failedEl.className = 'text-red-600 font-semibold font-mono';
+            } else {
+                failedEl.className = 'text-[var(--color-muted)] font-mono';
+            }
+
+            // Render Recipients Tags
+            const recipientsContainer = document.getElementById('modal-recipients');
+            recipientsContainer.innerHTML = '';
+            if (Array.isArray(log.recipients) && log.recipients.length > 0) {
+                log.recipients.forEach(item => {
+                    const email = typeof item === 'object' && item !== null ? item.email : item;
+                    const status = typeof item === 'object' && item !== null ? item.status : 'success';
+                    
+                    const span = document.createElement('span');
+                    span.className = 'px-2 py-0.5 rounded-[4px] border font-mono text-[10px] flex items-center gap-1.5';
+                    
+                    if (status === 'success') {
+                        span.className += ' bg-emerald-50 border-emerald-200 text-emerald-700';
+                        span.innerHTML = `<span>${email}</span><span class="w-1 h-1 rounded-full bg-emerald-500"></span>`;
+                    } else if (status === 'failed') {
+                        span.className += ' bg-rose-50 border-rose-200 text-rose-700';
+                        const errorTip = item.error ? ` title="${item.error}"` : '';
+                        span.innerHTML = `<span${errorTip}>${email} (Thất bại)</span><span class="w-1 h-1 rounded-full bg-rose-500"></span>`;
+                    } else {
+                        span.className += ' bg-amber-50 border-amber-200 text-amber-700';
+                        span.innerHTML = `<span>${email} (Chờ)</span><span class="w-1 h-1 rounded-full bg-amber-500"></span>`;
+                    }
+                    
+                    recipientsContainer.appendChild(span);
+                });
+            } else {
+                recipientsContainer.innerHTML = '<span class="text-[var(--color-muted)] font-mono">Không có người nhận</span>';
+            }
+        }
+        window.updateActiveModalUI = updateActiveModalUI;
 
         function openDetailModal(button) {
             const dataStr = button.getAttribute('data-log');
             if (!dataStr) return;
             try {
                 const log = JSON.parse(dataStr);
+                window.activeModalLogId = log.id;
                 
-                // Set Subject
-                document.getElementById('modal-subject').textContent = log.subject || '(Không có tiêu đề)';
-                
-                // Set Info Grid
-                document.getElementById('modal-sender').textContent = log.sender_name || 'N/A';
-                document.getElementById('modal-time').textContent = `${log.created_at_date} ${log.created_at_time}`;
-                document.getElementById('modal-success').textContent = log.sent_success;
-                document.getElementById('modal-failed').textContent = log.sent_failed;
-                
-                // Style and set status in detail modal
-                const statusEl = document.getElementById('modal-status');
-                if (log.status === 'pending') {
-                    statusEl.className = 'text-amber-600 font-semibold';
-                    statusEl.textContent = 'Chờ gửi';
-                } else if (log.status === 'sending') {
-                    statusEl.className = 'text-blue-600 font-semibold';
-                    statusEl.textContent = 'Đang gửi';
-                } else if (log.status === 'completed') {
-                    statusEl.className = 'text-emerald-600 font-semibold';
-                    statusEl.textContent = 'Hoàn thành';
-                } else {
-                    statusEl.className = 'text-rose-600 font-semibold';
-                    statusEl.textContent = 'Thất bại';
-                }
-                
-                // Style failed count based on value
-                const failedEl = document.getElementById('modal-failed');
-                if (log.sent_failed > 0) {
-                    failedEl.className = 'text-red-600 font-semibold font-mono';
-                } else {
-                    failedEl.className = 'text-[var(--color-muted)] font-mono';
-                }
-
-                // Render Recipients Tags
-                const recipientsContainer = document.getElementById('modal-recipients');
-                recipientsContainer.innerHTML = '';
-                if (Array.isArray(log.recipients) && log.recipients.length > 0) {
-                    log.recipients.forEach(item => {
-                        const email = typeof item === 'object' && item !== null ? item.email : item;
-                        const status = typeof item === 'object' && item !== null ? item.status : 'success';
-                        
-                        const span = document.createElement('span');
-                        span.className = 'px-2 py-0.5 rounded-[4px] border font-mono text-[10px] flex items-center gap-1.5';
-                        
-                        if (status === 'success') {
-                            span.className += ' bg-emerald-50 border-emerald-200 text-emerald-700';
-                            span.innerHTML = `<span>${email}</span><span class="w-1 h-1 rounded-full bg-emerald-500"></span>`;
-                        } else if (status === 'failed') {
-                            span.className += ' bg-rose-50 border-rose-200 text-rose-700';
-                            const errorTip = item.error ? ` title="${item.error}"` : '';
-                            span.innerHTML = `<span${errorTip}>${email} (Thất bại)</span><span class="w-1 h-1 rounded-full bg-rose-500"></span>`;
-                        } else {
-                            span.className += ' bg-amber-50 border-amber-200 text-amber-700';
-                            span.innerHTML = `<span>${email} (Chờ)</span><span class="w-1 h-1 rounded-full bg-amber-500"></span>`;
-                        }
-                        
-                        recipientsContainer.appendChild(span);
-                    });
-                } else {
-                    recipientsContainer.innerHTML = '<span class="text-[var(--color-muted)] font-mono">Không có người nhận</span>';
-                }
+                // Populate modal UI
+                updateActiveModalUI(log);
 
                 // Render content in Iframe
                 const iframe = document.getElementById('modal-content-frame');
@@ -537,6 +545,7 @@
         }
 
         function closeDetailModalDirect() {
+            window.activeModalLogId = null;
             if (detailModal) {
                 detailModal.classList.add('hidden');
             }

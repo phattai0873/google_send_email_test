@@ -115,8 +115,8 @@ class SendCampaignJob implements ShouldQueue
                 'recipients' => $recipientsData,
             ]);
 
-            // Throttle the sending to avoid triggering spam filters (delay 1 second per mail)
-            sleep(1);
+            // Throttle sending speed to protect sender reputation (configured in milliseconds, e.g., 500ms = 0.5s)
+            usleep((int) env('EMAIL_SEND_DELAY_MS', 1000) * 1000);
         }
 
         $log->update([

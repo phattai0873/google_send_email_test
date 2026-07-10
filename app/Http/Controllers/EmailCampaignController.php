@@ -80,4 +80,28 @@ class EmailCampaignController extends Controller
 
         return redirect()->route('email.logs')->with('success', "Chiến dịch gửi email đã được khởi tạo! Hệ thống đang tiến hành gửi ngầm tới {$count} người nhận.");
     }
+
+    /**
+     * Get the real-time status updates for specific campaign logs.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getStatusUpdates(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return response()->json([]);
+        }
+
+        $logs = EmailLog::where('user_id', Auth::id())
+            ->whereIn('id', $ids)
+            ->get();
+
+        return response()->json($logs);
+    }
 }

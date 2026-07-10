@@ -117,7 +117,6 @@ class GoogleAuthAndCampaignTest extends TestCase
         $user = User::create([
             'name' => 'Test User',
             'email' => 'test@gmail.com',
-            'password' => null,
         ]);
 
         $response = $this->actingAs($user)->post(route('logout'));

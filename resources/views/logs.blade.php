@@ -38,9 +38,9 @@
                                 <th class="py-3 px-4 text-right">Thao tác</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-[var(--color-rule)]">
+                        <tbody class="divide-y divide-[var(--color-rule)]" id="logs-tbody">
                             @foreach($logs as $log)
-                                <tr class="hover:bg-[var(--color-paper-2)] transition-colors">
+                                <tr class="hover:bg-[var(--color-paper-2)] transition-colors" data-log-id="{{ $log->id }}" data-status="{{ $log->status }}">
                                     <td class="py-4 px-4 font-medium text-[var(--color-ink)]">
                                         <div class="truncate max-w-[220px]" title="{{ $log->subject }}">{{ $log->subject }}</div>
                                         <div class="text-[10px] text-[var(--color-muted)] flex items-center gap-1.5 mt-0.5 font-mono">
@@ -64,7 +64,7 @@
                                         @endif
                                     </td>
                                     <td class="py-4 px-4 text-center font-mono text-[var(--color-ink-2)]">{{ $log->total_recipients }}</td>
-                                    <td class="py-4 px-4 text-center">
+                                    <td class="py-4 px-4 text-center" id="status-cell-{{ $log->id }}">
                                         @if($log->status === 'pending')
                                             <span class="text-amber-700 bg-amber-50 px-2 py-0.5 rounded-[4px] border border-amber-200 font-semibold text-[10px] whitespace-nowrap">Chờ gửi</span>
                                         @elseif($log->status === 'sending')
@@ -79,12 +79,12 @@
                                         @endif
                                     </td>
                                     <td class="py-4 px-4 text-center font-mono">
-                                        <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-[4px] border border-emerald-200 font-semibold">
+                                        <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-[4px] border border-emerald-200 font-semibold" id="success-count-{{ $log->id }}">
                                             {{ $log->sent_success }}
                                         </span>
                                     </td>
                                     <td class="py-4 px-4 text-center font-mono">
-                                        <span class="{{ $log->sent_failed > 0 ? 'text-red-700 bg-red-50 border border-red-200 font-semibold' : 'text-[var(--color-muted)]' }} px-2 py-0.5 rounded-[4px]">
+                                        <span class="{{ $log->sent_failed > 0 ? 'text-red-700 bg-red-50 border border-red-200 font-semibold' : 'text-[var(--color-muted)]' }} px-2 py-0.5 rounded-[4px]" id="failed-count-{{ $log->id }}">
                                             {{ $log->sent_failed }}
                                         </span>
                                     </td>
@@ -94,8 +94,10 @@
                                     </td>
                                     <td class="py-4 px-4 text-right">
                                         <button type="button" 
+                                                id="detail-btn-{{ $log->id }}"
                                                 onclick="openDetailModal(this)" 
                                                 data-log="{{ json_encode([
+                                                    'id' => $log->id,
                                                     'subject' => $log->subject,
                                                     'content' => $log->content,
                                                     'recipients' => $log->recipients,
@@ -125,3 +127,140 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let pollingInterval = null;
+
+        function startPolling() {
+            if (pollingInterval) return;
+
+            pollingInterval = setInterval(async () => {
+                const rows = document.querySelectorAll('tr[data-log-id]');
+                const pendingOrSendingIds = [];
+
+                rows.forEach(row => {
+                    const status = row.getAttribute('data-status');
+                    if (status === 'pending' || status === 'sending') {
+                        pendingOrSendingIds.push(row.getAttribute('data-log-id'));
+                    }
+                });
+
+                if (pendingOrSendingIds.length === 0) {
+                    clearInterval(pollingInterval);
+                    pollingInterval = null;
+                    return;
+                }
+
+                const params = new URLSearchParams();
+                pendingOrSendingIds.forEach(id => params.append('ids[]', id));
+
+                try {
+                    const response = await fetch(`/email-logs/status-updates?${params.toString()}`);
+                    if (!response.ok) return;
+
+                    const updatedLogs = await response.json();
+                    if (!Array.isArray(updatedLogs)) return;
+
+                    updatedLogs.forEach(log => {
+                        const row = document.querySelector(`tr[data-log-id="${log.id}"]`);
+                        if (!row) return;
+
+                        // Update status attribute on row
+                        row.setAttribute('data-status', log.status);
+
+                        // Update Status Cell
+                        const statusCell = document.getElementById(`status-cell-${log.id}`);
+                        if (statusCell) {
+                            let badgeHTML = '';
+                            if (log.status === 'pending') {
+                                badgeHTML = '<span class="text-amber-700 bg-amber-50 px-2 py-0.5 rounded-[4px] border border-amber-200 font-semibold text-[10px] whitespace-nowrap">Chờ gửi</span>';
+                            } else if (log.status === 'sending') {
+                                badgeHTML = '<span class="text-blue-700 bg-blue-50 px-2 py-0.5 rounded-[4px] border border-blue-200 font-semibold text-[10px] whitespace-nowrap inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>Đang gửi</span>';
+                            } else if (log.status === 'completed') {
+                                badgeHTML = '<span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-[4px] border border-emerald-200 font-semibold text-[10px] whitespace-nowrap">Hoàn thành</span>';
+                            } else {
+                                badgeHTML = '<span class="text-rose-700 bg-rose-50 px-2 py-0.5 rounded-[4px] border border-rose-200 font-semibold text-[10px] whitespace-nowrap">Thất bại</span>';
+                            }
+                            statusCell.innerHTML = badgeHTML;
+                        }
+
+                        // Update Success Count
+                        const successEl = document.getElementById(`success-count-${log.id}`);
+                        if (successEl) {
+                            successEl.textContent = log.sent_success;
+                        }
+
+                        // Update Failed Count
+                        const failedEl = document.getElementById(`failed-count-${log.id}`);
+                        if (failedEl) {
+                            failedEl.textContent = log.sent_failed;
+                            if (log.sent_failed > 0) {
+                                failedEl.className = 'text-red-700 bg-red-50 border border-red-200 font-semibold px-2 py-0.5 rounded-[4px]';
+                            } else {
+                                failedEl.className = 'text-[var(--color-muted)] px-2 py-0.5 rounded-[4px]';
+                            }
+                        }
+
+                        // Update Button data-log attributes
+                        const detailBtn = document.getElementById(`detail-btn-${log.id}`);
+                        if (detailBtn) {
+                            let senderName = 'N/A';
+                            try {
+                                const oldData = JSON.parse(detailBtn.getAttribute('data-log'));
+                                senderName = oldData.sender_name || 'N/A';
+                            } catch (e) {}
+
+                            // Format Date strings
+                            const dateObj = new Date(log.created_at);
+                            const day = String(dateObj.getDate()).padStart(2, '0');
+                            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                            const year = dateObj.getFullYear();
+                            const hour = String(dateObj.getHours()).padStart(2, '0');
+                            const minute = String(dateObj.getMinutes()).padStart(2, '0');
+                            const second = String(dateObj.getSeconds()).padStart(2, '0');
+
+                            const freshData = {
+                                id: log.id,
+                                subject: log.subject,
+                                content: log.content,
+                                recipients: log.recipients,
+                                total_recipients: log.total_recipients,
+                                sent_success: log.sent_success,
+                                sent_failed: log.sent_failed,
+                                status: log.status,
+                                created_at_date: `${day}/${month}/${year}`,
+                                created_at_time: `${hour}:${minute}:${second}`,
+                                sender_name: senderName
+                            };
+                            detailBtn.setAttribute('data-log', JSON.stringify(freshData));
+
+                            // Real-time Modal Refresh
+                            if (window.activeModalLogId && window.activeModalLogId === log.id) {
+                                window.updateActiveModalUI(freshData);
+                            }
+                        }
+                    });
+
+                } catch (err) {
+                    console.error('Failed to poll status updates:', err);
+                }
+            }, 1500);
+        }
+
+        const initialRows = document.querySelectorAll('tr[data-log-id]');
+        let hasActive = false;
+        initialRows.forEach(row => {
+            const status = row.getAttribute('data-status');
+            if (status === 'pending' || status === 'sending') {
+                hasActive = true;
+            }
+        });
+
+        if (hasActive) {
+            startPolling();
+        }
+    });
+</script>
+@endpush

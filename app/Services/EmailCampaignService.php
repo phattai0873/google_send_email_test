@@ -37,7 +37,6 @@ class EmailCampaignService
             'status' => 'pending',
         ]);
 
-        // Dispatch asynchronous queue job
         SendCampaignJob::dispatch($log);
 
         return $log;
