@@ -258,7 +258,12 @@
                     // Copy Quill content to hidden input before submitting
                     const hiddenContent = document.getElementById('content');
                     if (hiddenContent && quill) {
-                        hiddenContent.value = quill.root.innerHTML;
+                        // Check if Quill is empty (only whitespace/newlines) to trigger validation
+                        if (quill.getText().trim().length === 0) {
+                            hiddenContent.value = '';
+                        } else {
+                            hiddenContent.value = quill.root.innerHTML;
+                        }
                     }
 
                     const submitBtn = campaignForm.querySelector('button[type="submit"]');
